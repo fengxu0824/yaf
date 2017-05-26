@@ -69,6 +69,7 @@ extern PHPAPI void php_var_dump(zval **struc, int level);
 extern PHPAPI void php_debug_zval_dump(zval **struc, int level);
 
 ZEND_BEGIN_MODULE_GLOBALS(yaf)
+	zend_bool is_readonly_http_query;
 	zend_string	*ext;
 	zend_string *base_uri;
 	zend_string *directory;

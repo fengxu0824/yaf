@@ -151,6 +151,10 @@ static int yaf_application_parse_option(zval *options) /* {{{ */ {
 		YAF_G(bootstrap) = zend_string_copy(Z_STR_P(pzval));
 	}
 
+	if (UNEXPECTED((pzval = zend_hash_str_find(Z_ARRVAL_P(app), ZEND_STRL("isReadonlyHttpQuery"))) != NULL)) {
+		YAF_G(is_readonly_http_query) = zend_is_true(pzval);
+	}
+
 	if (EXPECTED((pzval = zend_hash_str_find(Z_ARRVAL_P(app), ZEND_STRL("library"))) != NULL)) {
 		if (IS_STRING == Z_TYPE_P(pzval)) {
 			if (*(Z_STRVAL_P(pzval) + Z_STRLEN_P(pzval)) == DEFAULT_SLASH) {

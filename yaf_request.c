@@ -181,25 +181,14 @@ zval *yaf_request_query_ex(uint type, zend_bool fetch_type, void *name, size_t l
 
 	zend_bool jit_initialization = PG(auto_globals_jit);
 
-	/* for phpunit test requirements */
-#if PHP_YAF_DEBUG
 	switch (type) {
-		case YAF_GLOBAL_VARS_POST:
-			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_POST"));
-			break;
-		case YAF_GLOBAL_VARS_GET:
-			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_GET"));
-			break;
-		case YAF_GLOBAL_VARS_COOKIE:
-			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_COOKIE"));
-			break;
-		case YAF_GLOBAL_VARS_SERVER:
+		case YAF_GLOBAL_VARS_REQUEST:
 			if (jit_initialization) {
-				zend_string *server_str = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
-				zend_is_auto_global(server_str);
-				zend_string_release(server_str);
+				zend_string *request_str = zend_string_init("_REQUEST", sizeof("_REQUEST") - 1, 0);
+				zend_is_auto_global(request_str);
+				zend_string_release(request_str);
 			}
-			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"));
+			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_REQUEST"));
 			break;
 		case YAF_GLOBAL_VARS_ENV:
 			if (jit_initialization) {
@@ -212,32 +201,19 @@ zval *yaf_request_query_ex(uint type, zend_bool fetch_type, void *name, size_t l
 		case YAF_GLOBAL_VARS_FILES:
 			carrier = &PG(http_globals)[YAF_GLOBAL_VARS_FILES];
 			break;
-		case YAF_GLOBAL_VARS_REQUEST:
-			if (jit_initialization) {
-				zend_string *request_str = zend_string_init("_REQUEST", sizeof("_REQUEST") - 1, 0);
-				zend_is_auto_global(request_str);
-				zend_string_release(request_str);
-			}
-			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_REQUEST"));
-			break;
-		default:
-			break;
-	}
-#else
-	switch (type) {
 		case YAF_GLOBAL_VARS_POST:
-		case YAF_GLOBAL_VARS_GET:
-		case YAF_GLOBAL_VARS_FILES:
-		case YAF_GLOBAL_VARS_COOKIE:
-			carrier = &PG(http_globals)[type];
-			break;
-		case YAF_GLOBAL_VARS_ENV:
-			if (jit_initialization) {
-				zend_string *env_str = zend_string_init("_ENV", sizeof("_ENV") - 1, 0);
-				zend_is_auto_global(env_str);
-				zend_string_release(env_str);
+			if (YAF_G(is_readonly_http_query)) {
+				carrier = &PG(http_globals)[YAF_GLOBAL_VARS_POST]; 
+			} else {
+				carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_POST"));
 			}
-			carrier = &PG(http_globals)[type];
+			break;
+		case YAF_GLOBAL_VARS_GET:
+			if (YAF_G(is_readonly_http_query)) {
+				carrier = &PG(http_globals)[YAF_GLOBAL_VARS_GET]; 
+			} else {
+				carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_GET"));
+			}
 			break;
 		case YAF_GLOBAL_VARS_SERVER:
 			if (jit_initialization) {
@@ -245,20 +221,23 @@ zval *yaf_request_query_ex(uint type, zend_bool fetch_type, void *name, size_t l
 				zend_is_auto_global(server_str);
 				zend_string_release(server_str);
 			}
-			carrier = &PG(http_globals)[type];
-			break;
-		case YAF_GLOBAL_VARS_REQUEST:
-			if (jit_initialization) {
-				zend_string *request_str = zend_string_init("_REQUEST", sizeof("_REQUEST") - 1, 0);
-				zend_is_auto_global(request_str);
-				zend_string_release(request_str);
+			if (YAF_G(is_readonly_http_query)) {
+				carrier = &PG(http_globals)[YAF_GLOBAL_VARS_SERVER]; 
+			} else {
+				carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_SERVER"));
 			}
-			carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_REQUEST"));
+			break;
+		case YAF_GLOBAL_VARS_COOKIE:
+			if (YAF_G(is_readonly_http_query)) {
+				carrier = &PG(http_globals)[YAF_GLOBAL_VARS_COOKIE]; 
+			} else {
+				carrier = zend_hash_str_find(&EG(symbol_table), ZEND_STRL("_COOKIE"));
+			}
 			break;
 		default:
 			break;
+
 	}
-#endif
 
 	if (!carrier) {
 		return NULL;

@@ -165,6 +165,7 @@ PHP_MSHUTDOWN_FUNCTION(yaf)
 */
 PHP_RINIT_FUNCTION(yaf)
 {
+	YAF_G(is_readonly_http_query) = 1;
 	YAF_G(throw_exception) = 1;
 	YAF_G(ext) = zend_string_init(YAF_DEFAULT_EXT, sizeof(YAF_DEFAULT_EXT) - 1, 0);
 	YAF_G(view_ext) = zend_string_init(YAF_DEFAULT_VIEW_EXT, sizeof(YAF_DEFAULT_VIEW_EXT) - 1, 0);
