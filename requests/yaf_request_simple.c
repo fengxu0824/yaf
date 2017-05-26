@@ -95,6 +95,7 @@ yaf_request_t *yaf_request_simple_instance(yaf_request_t *this_ptr, zval *module
 
 		if (query) {
 			zend_update_property_string(yaf_request_simple_ce, this_ptr, ZEND_STRL(YAF_REQUEST_PROPERTY_NAME_URI), query);
+			efree(query);
 		} else {
 			zend_update_property_string(yaf_request_simple_ce, this_ptr, ZEND_STRL(YAF_REQUEST_PROPERTY_NAME_URI), "");
 		}
